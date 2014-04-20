@@ -2,61 +2,39 @@ package main
 
 import (
     "fmt"
-    "ioutil" // for reading in a CSV
+    "crypto/sha256"
 )
 
-type Payments struct {
-    paymentList [][3]int
+type Bloomfilter struct {
+    capacity, numHashes int   
 }
 
-// this needs more explanatory comments...
-func (p* Payments) buildInviteMap() {
+def (b *Bloomfilter) SetCapacity(capacity int) {
+    &b.capacity = capacity
+}
+
+def (b *Bloomfilter) SetNumHashes(numHashes int) {
+    &b.numHashes = numHashes
+}
+
+// Need to figure out a good, idiomatic way to configure
+// the bloom filter
+
+// maybe just set up a function that returns a blank bloom filter
+def (capacity int, numHashes int) {
+    // make a hashmap
+    bloomFilter = [capacity]byte
+    hashFunctions = 
+}
+
+// Testing out how to hash some object
+func main() {
+    fmt.Println("Hello, playground")
     
-    invitedBy = map[[2]int]int{}
-
-    for i:= 0; i < p.length; i++ {
-        paymentId = p[i][0]
-        senderId = p[i][1]
-        recipientId = p[i][2]
-
-        // 
-        if m[recipientId] {
-            //DO SOMETHING HERE
-            existingPaymentId, exisitingInviterId = m[recipientId]
-
-            if paymentId < existingPaymentId {
-                m[recipientId] = paymentId, senderId
-            }
-        } else {
-            m[recipientId] = paymentId, senderId
-        }
-
-        if m[senderId] {
-            existingPaymentId, exisitingInviterId = m[senderId]
-
-            if paymentId < existingPaymentId {
-                m[senderId] = paymentId, senderId
-            } 
-
-        } else {
-            m[senderId] = paymentId, senderId
-        }
-
-
-    }
-}
-
-func (p* Payments) InvitedBy(customerId int) {
-    return (&p).invitedBy[customerId]
-}
-
-func (p* Payments) InviteChain(customerId int) {
-    inviteChain = []int{customerId}
-
-    currentCustomerId = customerId
-    for {
-        inviter = (&p).InvitedBy(currentCustomerId)
-        inviteChain = append(inviteChain, inviter)
-        currentCustomerId = inviter
-    }
+    // sha := sha256.New()
+    
+    result := sha256.Sum256([]byte("foobar"))
+    length := len(result)
+    fmt.Printf("%d\n", length)
+    fmt.Printf("%x", result)
 }
