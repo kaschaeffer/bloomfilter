@@ -8,16 +8,16 @@ import (
 )
 
 // constructor
-func NewBloomFilterStringKeyed(capacity int, numHashes int) *BloomFilterStringKeyed {
+func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStringKeyed {
     bloomFilter := new(BloomFilterStringKeyed)
-    bloomFilter.capacity = capacity
+    bloomFilter.byteCapacity = byteCapacity
     bloomFilter.numHashes = numHashes
-    bloomFilter.filter = make([]byte, capacity)
+    bloomFilter.filter = make([]byte, byteCapacity)
     return bloomFilter   
 }
 
 type BloomFilterStringKeyed struct {
-    capacity, numHashes int
+    byteCapacity, numHashes int
     filter []byte
 }
 
@@ -27,7 +27,14 @@ func (b *BloomFilterStringKeyed) AddKey(key string) {
     hashedKey := HashString(key)
     fmt.Println(hashedKey)
 
+    // split into two 16-byte hashes
+    hashedKey0 := hashedKey[:16]
+    hashedKey1 := hashedKey[16:]
+
+
+
     // now convert this to something that hashes to appropriate-sized filter
+    fmt.Println(b.byteCapacity)
     // do something with the key...
 }
 
@@ -77,6 +84,12 @@ func main() {
 
     part1 := result[16:]
     fmt.Printf("%d\n", len(part1))
-    fmt.Printf("%x\n", part1)   
+    fmt.Printf("%x\n", part1) 
+
+    b := NewBloomFilterStringKeyed(32, 10)
+
+    fmt.Println(b.byteCapacity)
+    fmt.Println(b.numHashes)
+    fmt.Println(b.filter)
 
 }
