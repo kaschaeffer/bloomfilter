@@ -7,45 +7,50 @@ import (
     "bytes"
 )
 
-type Bloomfilter struct {
+// constructor
+func NewBloomFilterStringKeyed(capacity int, numHashes int) *BloomFilterStringKeyed {
+    bloomFilter := new(BloomFilterStringKeyed)
+    bloomFilter.capacity = capacity
+    bloomFilter.numHashes = numHashes
+    bloomFilter.filter = make([]byte, capacity)
+    return bloomFilter   
+}
+
+type BloomFilterStringKeyed struct {
     capacity, numHashes int
-    filter []byte   
+    filter []byte
 }
 
-def (b *Bloomfilter) SetCapacity(capacity int) {
-    &b.capacity = capacity
+
+func (b *BloomFilterStringKeyed) AddKey(key string) {
+    // get a 32-byte hash of the key
+    hashedKey := HashString(key)
+    fmt.Println(hashedKey)
+
+    // now convert this to something that hashes to appropriate-sized filter
+    // do something with the key...
 }
 
-def (b *Bloomfilter) SetNumHashes(numHashes int) {
-    &b.numHashes = numHashes
+/////////////////////////////////////////////////
+//       general purpose hashing functions     //
+/////////////////////////////////////////////////
+
+func HashString(key string)([32]byte) {
+    byteKey := StringToByteArray(key)
+    hashedKey := HashByteArray(byteKey)
+    return hashedKey
 }
 
-def (b *Bloomfilter) InitializeFilter() {
-    &b.filter = make([]byte, &b.capacity)
+func StringToByteArray(str string)([]byte) {
+    return []byte(str)
 }
 
-// NOTE is there any way here to allow an arbitrary object to be added to the hash?
-def (b *Bloomfilter) AddElement(elementId int) {
-    
-    hashedElementId = GetHash(elementId)
-    // split up this hash into 2 pieces
-    hashedElementId0 = hashedElementId
+// general function that will be used for all hashing
+func HashByteArray(byteArray []byte)([32]byte) {
+    hash := sha256.Sum256(byteArray)   
+    return hash 
 }
 
-def GetHash(num int) {
-    hashedNum = sha256.Sum256([]byte(num))
-    return hashedNum
-}
-
-// Need to figure out a good, idiomatic way to configure
-// the bloom filter
-
-// maybe just set up a function that returns a blank bloom filter
-def (capacity int, numHashes int) {
-    // make a hashmap
-    bloomFilter = [capacity]byte
-    hashFunctions = 
-}
 
 // Testing out how to hash some object
 func main() {
@@ -72,5 +77,6 @@ func main() {
 
     part1 := result[16:]
     fmt.Printf("%d\n", len(part1))
-    fmt.Printf("%x\n", part1)     
+    fmt.Printf("%x\n", part1)   
+
 }
