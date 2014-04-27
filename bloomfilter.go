@@ -18,24 +18,112 @@ func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStri
 
 type BloomFilterStringKeyed struct {
     byteCapacity, numHashes int
-    filter []byte
+    bitHashTable []byte
 }
 
+// IDEA: maybe pass in which hashing algorithm you want in the constructor
+// (are functions first class in golang?)
+
+// Somewhere there should be appropriate error handling if filter is too big
+// for the hash functions...
 
 func (b *BloomFilterStringKeyed) AddKey(key string) {
+    // get hashes of the key
+    hashes := b.generateHashesFromString(key)
+    indices := b.convertHashesToCorrectRange(hashes)
+
+    // flip bits in the hash table (which will be represented as an array of bytes)
+
+
+    // do something with the key...
+}
+
+func (b &BloomFilterStringKeyed) setBitsFromIndices([]uint64 indices) {
+    // check length of the array
+
+    // this should be an atomic operation (how to do??)
+
+    // could also be parallelized via goroutines potentially
+    for i:=0; i<b.numHashes; i++ {
+
+    }
+
+}
+
+func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) [][]byte {
+
+    // TODO first should check the length of the array 
+
+    indices := make([]uint64, b.numHashes)
+
+    for i:=0; i<b.numHashes; i++ {    
+        hashAsInt := convertByteArraytoUInt64(hashes[i])
+        indices[i] = hashAsInt % b.capacity
+    }
+
+    return indices
+}
+
+func convertByteArraytoUInt64(byteArray []byte) uint64 {
+    convertedByteArray := binary.LittleEndian.Uint64(byteArray)
+    return convertedByteArray
+}
+
+func (b *BloomFilterStringKeyed) generateHashesFromString(key string) {
     // get a 32-byte hash of the key
     hashedKey := HashString(key)
     fmt.Println(hashedKey)
 
-    // split into two 16-byte hashes
-    hashedKey0 := hashedKey[:16]
-    hashedKey1 := hashedKey[16:]
+    // call this "seedHash" instead?
+
+    // split into two 8-byte hashes
+    // TODO: don't hardcode 8 below..
+    hashedKey0 := hashedKey[:8]
+    hashedKey1 := hashedKey[8:16]
+
+    // max filter size should be 2^(16*8)
+
+    fmt.Printf("hashedKey0 = %d\n", hashedKey0)
+    fmt.Printf("hashedKey1 = %d\n", hashedKey1)
+
+    // list of hashes
+    fmt.Printf("numHashes = %d\n", b.numHashes)
+    hashes := make([][]byte, b.numHashes)
+
+    for k:=0; k<b.numHashes; k++ {
+        kByte := byte(k)
+
+        hashes[k] = make([]byte, 8)
+        for i:=0; i<len(hashedKey0); i++ {
+            // hashes[k][i] = hashedKey0[i] + (hashedKey1[i]*byte(k))
+            hashes[k][i] = hashedKey0[i] ^ (hashedKey1[i]*kByte)
+
+        }
+    }
+
+    // convert hash to have the correct output
 
 
+    // TODO add some code that actually returns hashes
+}
 
-    // now convert this to something that hashes to appropriate-sized filter
-    fmt.Println(b.byteCapacity)
-    // do something with the key...
+// func byteMultiplication(b byte, k int) {
+//     b
+// }
+
+// func byteArrayToInt64(inputBytes *[8]byte) {
+//     var outputInt64 int64
+//     buf := bytes.NewBuffer(inputBytes)
+//     binary.Read(buf, binary.LittleEndian, &outputInt64)
+//     return outputInt64
+// }
+
+// Want function that takes (x is int ) and returns a flips one bit in a byte (8 bits)
+// **should be able to do this via bit-shifting tricks**
+
+func setBitInByte(b *byte, whichBit uint) {
+    // first check that whichBit is in appropriate range
+    *b = *b | (1 << whichBit)
 }
 
 /////////////////////////////////////////////////
@@ -91,5 +179,7 @@ func main() {
     fmt.Println(b.byteCapacity)
     fmt.Println(b.numHashes)
     fmt.Println(b.filter)
+
+    b.AddKey("foo")
 
 }
