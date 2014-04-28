@@ -12,7 +12,7 @@ func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStri
     bloomFilter := new(BloomFilterStringKeyed)
     bloomFilter.byteCapacity = byteCapacity
     bloomFilter.numHashes = numHashes
-    bloomFilter.filter = make([]byte, byteCapacity)
+    bloomFilter.bitHashTable = make([]byte, byteCapacity)
     return bloomFilter   
 }
 
@@ -31,6 +31,7 @@ func (b *BloomFilterStringKeyed) AddKey(key string) {
     // get hashes of the key
     hashes := b.generateHashesFromString(key)
     indices := b.convertHashesToCorrectRange(hashes)
+    fmt.Println(indices)
 
     // flip bits in the hash table (which will be represented as an array of bytes)
 
@@ -38,19 +39,19 @@ func (b *BloomFilterStringKeyed) AddKey(key string) {
     // do something with the key...
 }
 
-func (b &BloomFilterStringKeyed) setBitsFromIndices([]uint64 indices) {
-    // check length of the array
+// func (b &BloomFilterStringKeyed) setBitsFromIndices([]uint64 indices) {
+//     // check length of the array
 
-    // this should be an atomic operation (how to do??)
+//     // this should be an atomic operation (how to do??)
 
-    // could also be parallelized via goroutines potentially
-    for i:=0; i<b.numHashes; i++ {
+//     // could also be parallelized via goroutines potentially
+//     for i:=0; i<b.numHashes; i++ {
 
-    }
+//     }
 
-}
+// }
 
-func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) [][]byte {
+func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) []uint64 {
 
     // TODO first should check the length of the array 
 
@@ -58,7 +59,7 @@ func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) []
 
     for i:=0; i<b.numHashes; i++ {    
         hashAsInt := convertByteArraytoUInt64(hashes[i])
-        indices[i] = hashAsInt % b.capacity
+        indices[i] = hashAsInt % uint64(b.byteCapacity)
     }
 
     return indices
@@ -69,7 +70,7 @@ func convertByteArraytoUInt64(byteArray []byte) uint64 {
     return convertedByteArray
 }
 
-func (b *BloomFilterStringKeyed) generateHashesFromString(key string) {
+func (b *BloomFilterStringKeyed) generateHashesFromString(key string) [][]byte {
     // get a 32-byte hash of the key
     hashedKey := HashString(key)
     fmt.Println(hashedKey)
@@ -100,11 +101,7 @@ func (b *BloomFilterStringKeyed) generateHashesFromString(key string) {
 
         }
     }
-
-    // convert hash to have the correct output
-
-
-    // TODO add some code that actually returns hashes
+    return hashes
 }
 
 // func byteMultiplication(b byte, k int) {
@@ -178,7 +175,7 @@ func main() {
 
     fmt.Println(b.byteCapacity)
     fmt.Println(b.numHashes)
-    fmt.Println(b.filter)
+    fmt.Println(b.bitHashTable)
 
     b.AddKey("foo")
 
