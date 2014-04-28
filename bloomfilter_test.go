@@ -44,4 +44,12 @@ func TestSetBitInByteIncorrectBitPosition(t *testing.T) {
 	if err == nil {
 		t.Errorf("setByteInBit(%#02x, %d) should return error, but did not", in, bitPosition)
 	}
+
+	bitPosition = 7
+	in = 0x00
+	err = setBitInByte(&in, bitPosition)
+
+	if err != nil {
+		t.Errorf("setByteInBit(%#02x, %d) should not return error, but did", in, bitPosition)
+	}
 }
