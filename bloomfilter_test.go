@@ -30,7 +30,18 @@ func TestSetBitInByte(t *testing.T) {
         if setBitInByte(&testValues.in, testValues.inWhichBit); testValues.in != testValues.out {
             t.Errorf("setByteInBit(%#02x, %d) = %#02x, want %#02x", in, testValues.inWhichBit, testValues.in, testValues.out)
         }
-
     }
+}
 
+func TestSetBitInByteIncorrectBitPosition(t *testing.T) {
+    var bitPosition uint
+    var in byte
+    
+    bitPosition = 9
+    in = 0x00
+    err := setBitInByte(&in, bitPosition)
+    
+    if err == nil {
+        t.Errorf("setByteInBit(%#02x, %d) should return error, but did not", in, bitPosition)
+    }
 }

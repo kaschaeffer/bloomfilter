@@ -118,9 +118,13 @@ func (b *BloomFilterStringKeyed) generateHashesFromString(key string) [][]byte {
 // Want function that takes (x is int ) and returns a flips one bit in a byte (8 bits)
 // **should be able to do this via bit-shifting tricks**
 
-func setBitInByte(b *byte, whichBit uint) {
-    // first check that whichBit is in appropriate range
-    *b = *b | (1 << whichBit)
+func setBitInByte(b *byte, bitPosition uint) (err error) {
+    if (bitPosition>7) {
+        err = fmt.Errorf(
+            "Position of bit to set must be in the range [0,7), attempted to set position %", bitPosition)
+    }
+    *b = *b | (1 << bitPosition)
+    return
 }
 
 /////////////////////////////////////////////////
