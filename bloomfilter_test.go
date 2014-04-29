@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"bytes"
 )
 
 var setBitInByteTestValues = []struct {
@@ -64,9 +65,42 @@ func TestNewBloomFilterStringKeyed(t *testing.T) {
 	if bf.numHashes != numHashes {
 		t.Errorf("NewBloomFilterStringKeyed(%d, %d) returned object, b, with incorrect b.numHashes = %d", byteCapacity, numHashes, bf.numHashes)
 	}
+
+	defaultBitHashTable := make([]byte, byteCapacity)
+	for i:=0; i<len(defaultBitHashTable); i++ {
+		defaultBitHashTable[i] = 0x00
+	}
+	if !bytes.Equal(bf.bitHashTable, defaultBitHashTable) {
+		t.Errorf("NewBloomFilterStringKeyed(%d, %d) returned object, b, with incorrect b.bitHashTable = %x", byteCapacity, numHashes, bf.bitHashTable)
+	}
 }
 
-// func TestSetBitFromIndex(t *testing.T) {
-// 	// initialize empty bloom filter (maybe this should be its own function?)
-// 	// TODO
-// }
+func TestSetBitFromIndex(t *testing.T) {
+	// initialize empty bloom filter (maybe this should be its own function?)
+	byteCapacity := 100
+	numHashes := 5
+	bf := NewBloomFilterStringKeyed(byteCapacity, numHashes)
+
+	// set a bit
+	arrayIndex := 0
+	var modifiedByte byte
+	var bitToSet uint64
+
+	bitToSet = 0
+	modifiedByte = 0x01
+
+	// maybe should factor out this boilerplat...
+	expectedBitHashTable := make([]byte, byteCapacity)
+	for i:=0; i<len(expectedBitHashTable); i++ {
+		expectedBitHashTable[i] = 0x00
+	}	
+	expectedBitHashTable[arrayIndex] = modifiedByte
+
+	bf.setBitFromIndex(bitToSet)
+
+	if !bytes.Equal(bf.bitHashTable, expectedBitHashTable) {
+		t.Errorf("Attempted to set bit %d.  Expected array %x, returned array %x", bitToSet, bf.bitHashTable, expectedBitHashTable)
+	}
+
+	// TODO
+}
