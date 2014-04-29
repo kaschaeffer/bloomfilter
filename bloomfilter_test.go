@@ -28,7 +28,7 @@ func TestSetBitInByte(t *testing.T) {
 
 		in := testValues.in // make a copy since setByteInBit mutates testValues.in
 		if setBitInByte(&testValues.in, testValues.inWhichBit); testValues.in != testValues.out {
-			t.Errorf("setByteInBit(%#02x, %d) = %#02x, want %#02x", in, testValues.inWhichBit, testValues.in, testValues.out)
+			t.Errorf("setBitInByte(%#02x, %d) = %#02x, want %#02x", in, testValues.inWhichBit, testValues.in, testValues.out)
 		}
 	}
 }
@@ -42,7 +42,7 @@ func TestSetBitInByteIncorrectBitPosition(t *testing.T) {
 	err := setBitInByte(&in, bitPosition)
 
 	if err == nil {
-		t.Errorf("setByteInBit(%#02x, %d) should return error, but did not", in, bitPosition)
+		t.Errorf("setBitInByte(%#02x, %d) should return error, but did not", in, bitPosition)
 	}
 
 	bitPosition = 7
@@ -50,6 +50,23 @@ func TestSetBitInByteIncorrectBitPosition(t *testing.T) {
 	err = setBitInByte(&in, bitPosition)
 
 	if err != nil {
-		t.Errorf("setByteInBit(%#02x, %d) should not return error, but did", in, bitPosition)
+		t.Errorf("setBitInByte(%#02x, %d) should not return error, but did", in, bitPosition)
 	}
 }
+
+func TestNewBloomFilterStringKeyed(t *testing.T) {
+	byteCapacity := 100
+	numHashes := 5
+	bf := NewBloomFilterStringKeyed(byteCapacity, numHashes)
+	if bf.byteCapacity != byteCapacity {
+		t.Errorf("NewBloomFilterStringKeyed(%d, %d) returned object, b, with incorrect b.byteCapacity = %d", byteCapacity, numHashes, bf.byteCapacity)
+	}
+	if bf.numHashes != numHashes {
+		t.Errorf("NewBloomFilterStringKeyed(%d, %d) returned object, b, with incorrect b.numHashes = %d", byteCapacity, numHashes, bf.numHashes)
+	}
+}
+
+// func TestSetBitFromIndex(t *testing.T) {
+// 	// initialize empty bloom filter (maybe this should be its own function?)
+// 	// TODO
+// }

@@ -12,7 +12,7 @@ func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStri
 	bloomFilter := new(BloomFilterStringKeyed)
 	bloomFilter.byteCapacity = byteCapacity
 	bloomFilter.numHashes = numHashes
-	bloomFilter.bitHashTable = make([]byte, byteCapacity)
+	bloomFilter.bitHashTable = make([]byte, byteCapacity) // rename this?
 	return bloomFilter
 }
 
@@ -28,27 +28,27 @@ type BloomFilterStringKeyed struct {
 // for the hash functions...
 
 func (b *BloomFilterStringKeyed) AddKey(key string) {
-	// get hashes of the key
 	hashes := b.generateHashesFromString(key)
 	indices := b.convertHashesToCorrectRange(hashes)
-	fmt.Println(indices)
-
-	// flip bits in the hash table (which will be represented as an array of bytes)
-
-	// do something with the key...
+	b.setBitsFromIndices(indices)
 }
 
-// func (b &BloomFilterStringKeyed) setBitsFromIndices([]uint64 indices) {
-//     // check length of the array
+func (b *BloomFilterStringKeyed) setBitsFromIndices(indices []uint64) {
+    // check length of the array
 
-//     // this should be an atomic operation (how to do??)
+    // this should be an atomic operation (how to do??)
 
-//     // could also be parallelized via goroutines potentially
-//     for i:=0; i<b.numHashes; i++ {
+    // could also be parallelized via goroutines potentially
+    for i:=0; i<b.numHashes; i++ {
+    	b.setBitFromIndex(indices[i])
+    }
+}
 
-//     }
-
-// }
+func (b *BloomFilterStringKeyed) setBitFromIndex(index uint64) {
+	arrayIndex := index / 8
+	bitPosition := uint(index % 8)
+	setBitInByte(&b.bitHashTable[arrayIndex], bitPosition)
+}
 
 func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) []uint64 {
 
