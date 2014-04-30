@@ -75,6 +75,20 @@ func TestNewBloomFilterStringKeyed(t *testing.T) {
 	}
 }
 
+var setBitFromIndexTestValues = []struct {
+	bitToSet         		uint64
+	expectedArrayIndex		int 
+	expectedModifiedByte    byte // TODO: is the variable name 'out' confusing here since SetbitInByte is in-place?
+}{
+	{0, 0, 0x01},
+	{1, 0, 0x02},
+	{2, 0, 0x04},
+	{3, 0, 0x08},
+	{8, 1, 0x01},
+	{9, 2, 0x02},
+	{15, 2, 0x80},
+}
+
 func TestSetBitFromIndex(t *testing.T) {
 	// initialize empty bloom filter (maybe this should be its own function?)
 	byteCapacity := 100
@@ -89,7 +103,7 @@ func TestSetBitFromIndex(t *testing.T) {
 	bitToSet = 0
 	modifiedByte = 0x01
 
-	// maybe should factor out this boilerplat...
+	// maybe should factor out this boilerplait...
 	expectedBitHashTable := make([]byte, byteCapacity)
 	for i:=0; i<len(expectedBitHashTable); i++ {
 		expectedBitHashTable[i] = 0x00
