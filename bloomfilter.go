@@ -7,19 +7,25 @@ import (
 	"fmt"
 )
 
+// possibly pass in the hash function too??
+type BloomFilter struct {
+	byteCapacity, numHashes int
+	bitHashTable            []byte
+	convertKeyToByteArray	func(interface{}) []byte
+}
+
 // constructor
-func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStringKeyed {
-	return &BloomFilterStringKeyed{
+func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilter {
+	return &BloomFilter{
 		byteCapacity: byteCapacity,
 		numHashes: numHashes,
 		bitHashTable: make([]byte, byteCapacity),
+		convertKeyToByteArray: func(key interface{}) []byte {
+			return []byte(key.(string))
+		},
 	}
 }
 
-type BloomFilterStringKeyed struct {
-	byteCapacity, numHashes int
-	bitHashTable            []byte
-}
 
 // IDEA: maybe pass in which hashing algorithm you want in the constructor
 // (are functions first class in golang?)
@@ -27,13 +33,13 @@ type BloomFilterStringKeyed struct {
 // Somewhere there should be appropriate error handling if filter is too big
 // for the hash functions...
 
-func (b *BloomFilterStringKeyed) AddKey(key string) {
-	hashes := b.generateHashesFromString(key)
+func (b *BloomFilter) AddKey(key interface{}) {
+	hashes := b.generateHashes(key)
 	indices := b.convertHashesToCorrectRange(hashes)
 	b.setBitsFromIndices(indices)
 }
 
-func (b *BloomFilterStringKeyed) setBitsFromIndices(indices []uint64) {
+func (b *BloomFilter) setBitsFromIndices(indices []uint64) {
     // check length of the array
 
     // this should be an atomic operation (how to do??)
@@ -44,13 +50,13 @@ func (b *BloomFilterStringKeyed) setBitsFromIndices(indices []uint64) {
     }
 }
 
-func (b *BloomFilterStringKeyed) setBitFromIndex(index uint64) {
+func (b *BloomFilter) setBitFromIndex(index uint64) {
 	arrayIndex := index / 8
 	bitPosition := uint(index % 8)
 	setBitInByte(&b.bitHashTable[arrayIndex], bitPosition)
 }
 
-func (b *BloomFilterStringKeyed) convertHashesToCorrectRange(hashes [][]byte) []uint64 {
+func (b *BloomFilter) convertHashesToCorrectRange(hashes [][]byte) []uint64 {
 
 	// TODO first should check the length of the array
 
@@ -69,9 +75,15 @@ func convertByteArraytoUInt64(byteArray []byte) uint64 {
 	return convertedByteArray
 }
 
-func (b *BloomFilterStringKeyed) generateHashesFromString(key string) [][]byte {
+func (b *BloomFilter) HashKey(key interface{}) [32]byte {
+	byteKey := b.convertKeyToByteArray(key)
+	hashedKey := HashByteArray(byteKey)
+	return hashedKey
+}
+
+func (b *BloomFilter) generateHashes(key interface{}) [][]byte {
 	// get a 32-byte hash of the key
-	hashedKey := HashString(key)
+	hashedKey := b.HashKey(key)
 	fmt.Println(hashedKey)
 
 	// call this "seedHash" instead?
@@ -130,15 +142,6 @@ func setBitInByte(b *byte, bitPosition uint) (err error) {
 //       general purpose hashing functions     //
 /////////////////////////////////////////////////
 
-func HashString(key string) [32]byte {
-	byteKey := StringToByteArray(key)
-	hashedKey := HashByteArray(byteKey)
-	return hashedKey
-}
-
-func StringToByteArray(str string) []byte {
-	return []byte(str)
-}
 
 // general function that will be used for all hashing
 func HashByteArray(byteArray []byte) [32]byte {
