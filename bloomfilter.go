@@ -9,11 +9,11 @@ import (
 
 // constructor
 func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilterStringKeyed {
-	bloomFilter := new(BloomFilterStringKeyed)
-	bloomFilter.byteCapacity = byteCapacity
-	bloomFilter.numHashes = numHashes
-	bloomFilter.bitHashTable = make([]byte, byteCapacity) // rename this?
-	return bloomFilter
+	return &BloomFilterStringKeyed{
+		byteCapacity: byteCapacity,
+		numHashes: numHashes,
+		bitHashTable: make([]byte, byteCapacity),
+	}
 }
 
 type BloomFilterStringKeyed struct {
