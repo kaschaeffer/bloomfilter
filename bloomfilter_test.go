@@ -149,6 +149,27 @@ func TestGetBitInByte(t *testing.T) {
 	}
 }
 
+func TestGetBitInByteIncorrectBitPosition(t *testing.T) {
+	var bitPosition uint
+	var in byte
+
+	bitPosition = 9
+	in = 0x00
+	_, err := getBitInByte(&in, bitPosition)
+
+	if err == nil {
+		t.Errorf("setBitInByte(%#02x, %d) should return error, but did not", in, bitPosition)
+	}
+
+	bitPosition = 7
+	in = 0x00
+	_, err = getBitInByte(&in, bitPosition)
+
+	if err != nil {
+		t.Errorf("setBitInByte(%#02x, %d) should not return error, but did", in, bitPosition)
+	}
+}
+
 var addKeyValues = []struct {
 	byteCapacity         int
 	numHashes int
