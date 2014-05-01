@@ -148,3 +148,78 @@ func TestGetBitInByte(t *testing.T) {
 		}
 	}
 }
+
+var addKeyValues = []struct {
+	byteCapacity         int
+	numHashes int
+	key        string
+}{
+	{10000, 3, "foobar"},
+	{10000, 4, "i am a test"},
+	{10000, 5, "whatever"},
+	{10000, 6, "hope this test passes!!!!!!!!"},
+}
+
+func TestAddKey(t *testing.T) {
+	for i:=0; i<len(addKeyValues); i++ {
+		testValues := addKeyValues[i]
+		b := NewBloomFilterStringKeyed(testValues.byteCapacity, testValues.numHashes)
+		
+		b.AddKey(testValues.key)
+		numBitsSet := countBitsInBytes(&b.bitHashTable)
+		
+		if numBitsSet != testValues.numHashes {
+			t.Errorf("addKey(%s) should set %d bits, but only set %d bits", testValues.key, testValues.numHashes, numBitsSet)
+		}
+	}
+}
+
+var queryKeyValues = []struct {
+	byteCapacity         int
+	numHashes int
+	addKey        string
+	queryKey 	string
+	result		bool
+}{
+	{10000, 3, "foobar", "foobar", true},
+	{10000, 3, "foobar", "fooBar", false},
+	{10000, 3, "foobar", "foobar ", false},
+	{10000, 3, "foobar", "foobaz", false},
+	{10000, 3, "foobar", "lasfdahfak", false},
+	{10000, 13, "zzzz", "ZZZZ", false},
+	{10000, 13, "zzzz", "zzzz", true},
+}
+
+func TestQueryKey(t *testing.T) {
+	for i:=0; i<len(queryKeyValues); i++ {
+		testValues := queryKeyValues[i]
+		b := NewBloomFilterStringKeyed(testValues.byteCapacity, testValues.numHashes)
+		
+		b.AddKey(testValues.addKey)
+		result := b.QueryKey(testValues.queryKey)
+		
+		if result != testValues.result {
+			t.Errorf("Added key %s, then queried key %s.  Expected result to be %t, but returned %t",
+				testValues.addKey,
+				testValues.queryKey,
+				testValues.result,
+				result,
+				)
+		} 
+	}
+}
+
+// Useful utility method for performing comparisons
+func countBitsInBytes(byteArray *[]byte)(bitCount int) {
+	for i:=0; i<len(*byteArray); i++ {
+		bitCount += countBitsInByte(&(*byteArray)[i])
+	}
+	return
+}
+
+func countBitsInByte(b *byte)(bitCount int) {
+	for i:=uint(0); i<8; i++ {
+		bitCount += int((*b >> i) & 1)
+	}
+	return
+}

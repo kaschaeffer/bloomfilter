@@ -121,7 +121,6 @@ func (b *BloomFilter) HashKey(key interface{}) [32]byte {
 func (b *BloomFilter) generateHashes(key interface{}) [][]byte {
 	// get a 32-byte hash of the key
 	hashedKey := b.HashKey(key)
-	fmt.Println(hashedKey)
 
 	// call this "seedHash" instead?
 
@@ -132,11 +131,6 @@ func (b *BloomFilter) generateHashes(key interface{}) [][]byte {
 
 	// max filter size should be 2^(16*8)
 
-	fmt.Printf("hashedKey0 = %d\n", hashedKey0)
-	fmt.Printf("hashedKey1 = %d\n", hashedKey1)
-
-	// list of hashes
-	fmt.Printf("numHashes = %d\n", b.numHashes)
 	hashes := make([][]byte, b.numHashes)
 
 	for k := 0; k < b.numHashes; k++ {
