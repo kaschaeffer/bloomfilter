@@ -174,8 +174,8 @@ func getBitInByte(b *byte, bitPosition uint) (bit bool, err error) {
 		err = fmt.Errorf(
 			"Position of bit to set must be in the range [0,7), attempted to set position %", bitPosition)
 	}
-	byteCheck := *b & (1 << bitPosition)
-	bit = (byteCheck != 0x00)
+
+	bit = ((*b >> bitPosition) & 0x01) == 1
 	return
 }
 
