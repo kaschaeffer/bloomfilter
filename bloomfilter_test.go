@@ -118,3 +118,33 @@ func TestSetBitFromIndex(t *testing.T) {
 
 	// TODO
 }
+
+var getBitInByteTestValues = []struct {
+	in         byte
+	inWhichBit uint
+	out        bool
+}{
+	{0x01, 0, true},
+	{0x01, 1, false},
+	{0x02, 1, true},
+	{0x04, 2, true},
+	{0x08, 3, true},
+	{0x10, 4, true},
+	{0x10, 0, false},
+	{0x20, 5, true},
+	{0x40, 6, true},
+	{0x80, 7, true},
+	{0x01, 0, true},
+	{0x03, 1, true},
+	{0x03, 2, false},
+}
+
+func TestGetBitInByte(t *testing.T) {
+	for i := 0; i < len(getBitInByteTestValues); i++ {
+		testValues := getBitInByteTestValues[i]
+
+		if result, _ :=getBitInByte(&testValues.in, testValues.inWhichBit); result != testValues.out {
+			t.Errorf("getBitInByte(%#02x, %d) = %t, want %t", testValues.in, testValues.inWhichBit, result, testValues.out)
+		}
+	}
+}

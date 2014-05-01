@@ -33,6 +33,21 @@ func NewBloomFilterStringKeyed(byteCapacity int, numHashes int) *BloomFilter {
 // Somewhere there should be appropriate error handling if filter is too big
 // for the hash functions...
 
+func (b *BloomFilter) QueryKey(key interface{}) (keyFound bool) {
+	hashes := b.generateHashes(key)
+	indices := b.convertHashesToCorrectRange(hashes)
+	bits := b.getBitsFromIndices(indices)
+	
+	for i:=0; i<b.numHashes; i++ {
+		if !bits[i] {
+			keyFound = false
+			return
+		}
+	}
+	keyFound = true
+	return
+}
+
 func (b *BloomFilter) AddKey(key interface{}) {
 	hashes := b.generateHashes(key)
 	indices := b.convertHashesToCorrectRange(hashes)
@@ -54,6 +69,28 @@ func (b *BloomFilter) setBitFromIndex(index uint64) {
 	arrayIndex := index / 8
 	bitPosition := uint(index % 8)
 	setBitInByte(&b.bitHashTable[arrayIndex], bitPosition)
+}
+
+func (b *BloomFilter) getBitsFromIndices(indices []uint64) (bits []bool) {
+    // check length of the array
+
+    // this should be an atomic operation (how to do??)
+
+    // could also be parallelized via goroutines potentially
+    bits = make([]bool, b.numHashes)
+
+    for i:=0; i<b.numHashes; i++ {
+    	bits[i] = b.getBitFromIndex(indices[i])
+    }
+    return
+}
+
+func (b *BloomFilter) getBitFromIndex(index uint64)(bit bool) {
+	arrayIndex := index / 8
+	bitPosition := uint(index % 8)
+	bit, _ = getBitInByte(&b.bitHashTable[arrayIndex], bitPosition)
+	return
+
 }
 
 func (b *BloomFilter) convertHashesToCorrectRange(hashes [][]byte) []uint64 {
@@ -135,6 +172,16 @@ func setBitInByte(b *byte, bitPosition uint) (err error) {
 			"Position of bit to set must be in the range [0,7), attempted to set position %", bitPosition)
 	}
 	*b = *b | (1 << bitPosition)
+	return
+}
+
+func getBitInByte(b *byte, bitPosition uint) (bit bool, err error) {
+	if bitPosition > 7 {
+		err = fmt.Errorf(
+			"Position of bit to set must be in the range [0,7), attempted to set position %", bitPosition)
+	}
+	byteCheck := *b & (1 << bitPosition)
+	bit = (byteCheck != 0x00)
 	return
 }
 
